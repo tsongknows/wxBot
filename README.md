@@ -51,10 +51,7 @@ Web微信协议参考资料：
 使用之前需要所依赖的库:
 
 ```bash
-pip install requests
-pip install pyqrcode
-pip install pypng
-pip install Pillow
+pip install requests pyqrcode pypng Pillow
 ```
 
 ## 2 快速开发
