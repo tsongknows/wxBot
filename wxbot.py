@@ -14,6 +14,7 @@ import urllib
 import time
 import re
 import random
+import redis
 from traceback import format_exc
 from requests.exceptions import ConnectionError, ReadTimeout
 import HTMLParser
@@ -59,6 +60,7 @@ class WXBot:
     """WXBot功能类"""
 
     def __init__(self):
+        self.r = redis.StrictRedis(host='localhost', port=6379, db=0)
         self.DEBUG = False
         self.uuid = ''
         self.base_uri = ''
@@ -273,6 +275,16 @@ class WXBot:
         if 'nickname' in name:
             return name['nickname']
         return None
+
+    def addMessageToHistory(self, msg):
+        """
+        添加消息到历史记录
+        :param msg:
+        :return:
+        """
+
+        return self.r.lpush("msg", json.dumps(msg, ensure_ascii=False).encode('utf8'))
+
 
     def get_user_type(self, wx_user_id):
         """

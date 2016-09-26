@@ -7,6 +7,7 @@ from wxbot import *
 class MyWXBot(WXBot):
     def handle_msg_all(self, msg):
         print str(msg)
+        self.addMessageToHistory(msg)
         content = msg['content']['data']
         if msg['msg_type_id'] == 4 and msg['content']['type'] == 0:
             self.send_msg_by_uid(u'hi', msg['user']['id'])

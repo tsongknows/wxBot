@@ -22,6 +22,9 @@ class TulingWXBot(WXBot):
         print 'tuling_key:', self.tuling_key
 
     def tuling_auto_reply(self, uid, msg):
+        if msg == u"sb":
+            return u"你才sb, 发个红包先"
+
         if self.tuling_key:
             url = "http://www.tuling123.com/openapi/api"
             user_id = uid.replace('@', '')[:30]
@@ -61,6 +64,8 @@ class TulingWXBot(WXBot):
                     self.send_msg_by_uid(u'[Robot]' + u'机器人已开启！', msg['to_user_id'])
 
     def handle_msg_all(self, msg):
+        self.addMessageToHistory(msg)
+
         if not self.robot_switch and msg['msg_type_id'] != 1:
             return
 
@@ -77,7 +82,7 @@ class TulingWXBot(WXBot):
             if not 'detail' in msg['content']:
                 return
 
-            is_at_me = isAtMe(msg, getMyNames())
+            is_at_me = self.isAtMe(msg, self.getMyNames(msg))
             if not is_at_me:
                 return
 
@@ -89,24 +94,24 @@ class TulingWXBot(WXBot):
                 reply += u"对不起，只认字，其他杂七杂八的我都不认识，,,Ծ‸Ծ,,"
             self.send_msg_by_uid(reply, msg['user']['id'])
 
-def getMyNames():
-    my_names = self.get_group_member_name(self.my_account['UserName'], msg['user']['id'])
-    if my_names is None:
-        my_names = {}
-    if 'NickName' in self.my_account and self.my_account['NickName']:
-        my_names['nickname2'] = self.my_account['NickName']
-    if 'RemarkName' in self.my_account and self.my_account['RemarkName']:
-        my_names['remark_name2'] = self.my_account['RemarkName']
-    
-    return my_names
+    def getMyNames(self,msg):
+        my_names = self.get_group_member_name(self.my_account['UserName'], msg['user']['id'])
+        if my_names is None:
+            my_names = {}
+        if 'NickName' in self.my_account and self.my_account['NickName']:
+            my_names['nickname2'] = self.my_account['NickName']
+        if 'RemarkName' in self.my_account and self.my_account['RemarkName']:
+            my_names['remark_name2'] = self.my_account['RemarkName']
 
-def isAtMe(msg,my_names):
-    for detail in msg['content']['detail']:
-        if detail['type'] == 'at':
-            for k in my_names:
-                if my_names[k] and my_names[k] == detail['value']:
-                    return True
-    return False
+        return my_names
+
+    def isAtMe(self,msg,my_names):
+        for detail in msg['content']['detail']:
+            if detail['type'] == 'at':
+                for k in my_names:
+                    if my_names[k] and my_names[k] == detail['value']:
+                        return True
+        return False
 
 def main():
     bot = TulingWXBot()
