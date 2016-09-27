@@ -4,7 +4,7 @@
 from wxbot import *
 import ConfigParser
 import json
-
+from pymongo import MongoClient
 
 class TulingWXBot(WXBot):
     def __init__(self):
@@ -17,9 +17,22 @@ class TulingWXBot(WXBot):
             cf = ConfigParser.ConfigParser()
             cf.read('conf.ini')
             self.tuling_key = cf.get('main', 'key')
+            self.mongoConnectionString = cf.get('main', 'connectionstring')
+            self.mongoDatabase = cf.get('main', 'database')
+            self.db = MongoClient(self.mongoConnectionString)[self.mongoDatabase]
+
         except Exception:
             pass
         print 'tuling_key:', self.tuling_key
+
+    def addMessageToHistory(self, msg):
+        """
+        添加消息到历史记录
+        :param msg:
+        :return:
+        """
+
+        return self.db.wechatHistory.insert_one(json.loads(json.dumps(msg, ensure_ascii=False).encode('utf8')))
 
     def tuling_auto_reply(self, uid, msg):
         if msg == u"sb":
@@ -62,6 +75,16 @@ class TulingWXBot(WXBot):
                 if i == msg_data:
                     self.robot_switch = True
                     self.send_msg_by_uid(u'[Robot]' + u'机器人已开启！', msg['to_user_id'])
+
+    def schedule(self):
+        """
+        做任务型事情的函数，如果需要，可以在子类中覆盖此函数
+        此函数在处理消息的间隙被调用，请不要长时间阻塞此函数
+        """
+        self.get_contact()
+        print 'self.group_list : %s' % len(self.group_list)
+
+        pass
 
     def handle_msg_all(self, msg):
         self.addMessageToHistory(msg)
